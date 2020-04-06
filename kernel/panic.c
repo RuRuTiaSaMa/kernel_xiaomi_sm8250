@@ -31,6 +31,7 @@
 #include <linux/debugfs.h>
 #include <linux/sysfs.h>
 #include <asm/sections.h>
+#include <linux/syscalls.h>
 #include <soc/qcom/minidump.h>
 
 #define PANIC_TIMER_STEP 100
@@ -169,6 +170,25 @@ void nmi_panic(struct pt_regs *regs, const char *msg)
 }
 EXPORT_SYMBOL(nmi_panic);
 
+#define FS_SYNC_TIMEOUT_MS 2000
+static struct work_struct fs_sync_work;
+static DECLARE_COMPLETION(sync_compl);
+static void fs_sync_work_func(struct work_struct *work)
+{
+	pr_emerg("sys_sync:syncing fs\n");
+	ksys_sync();
+	complete(&sync_compl);
+}
+
+void exec_fs_sync_work(void)
+{
+	INIT_WORK(&fs_sync_work, fs_sync_work_func);
+	reinit_completion(&sync_compl);
+	schedule_work(&fs_sync_work);
+	if (wait_for_completion_timeout(&sync_compl, msecs_to_jiffies(FS_SYNC_TIMEOUT_MS)) == 0)
+		pr_emerg("sys_sync:wait complete timeout\n");
+}
+
 void check_panic_on_warn(const char *origin)
 {
 	unsigned int limit;
@@ -208,6 +228,8 @@ void panic(const char *fmt, ...)
 		 */
 		panic_on_warn = 0;
 	}
+
+	exec_fs_sync_work();
 
 	/*
 	 * Disable local interrupts. This will prevent panic_smp_self_stop
