@@ -107,19 +107,12 @@ EXPORT_SYMBOL_GPL(__fsverity_verify_signature);
  * Return: 0 on success (signature valid or not required); -errno on failure
  */
 int fsverity_verify_signature(const struct fsverity_info *vi,
-			      const struct fsverity_descriptor *desc,
-			      size_t desc_size)
+			      const u8 *signature, size_t sig_size)
 {
 	const struct inode *inode = vi->inode;
 	const struct fsverity_hash_alg *hash_alg = vi->tree_params.hash_alg;
-	const u32 sig_size = le32_to_cpu(desc->sig_size);
 
-	if (sig_size > desc_size - sizeof(*desc)) {
-		fsverity_err(inode, "Signature overflows verity descriptor");
-		return -EBADMSG;
-	}
-
-	return __fsverity_verify_signature(inode, desc->signature, sig_size,
+	return __fsverity_verify_signature(inode, signature, sig_size,
 				vi->file_digest, hash_alg - fsverity_hash_algs);
 }
 
