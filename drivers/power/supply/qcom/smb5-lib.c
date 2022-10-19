@@ -3325,7 +3325,7 @@ int smblib_get_prop_wireless_fw_version(struct smb_charger *chg,
 	return rc;
 }
 
-bool skip_charge_therm = false;
+bool skip_charge_therm = true;
 module_param(skip_charge_therm, bool, 0644);
 
 static int smblib_dc_therm_charging(struct smb_charger *chg,
