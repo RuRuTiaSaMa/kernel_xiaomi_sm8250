@@ -18,6 +18,7 @@
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/fb.h>
+#include <drm/drm_notifier_mi.h>
 
 #define MAPLE_IOSCHED_PATCHLEVEL	(8)
 
@@ -269,19 +270,18 @@ static int fb_notifier_callback(struct notifier_block *self,
 {
 	struct maple_data *mdata = container_of(self,
 									struct maple_data, fb_notifier);
-	struct fb_event *evdata = data;
+	struct 	mi_drm_notifier  *evdata = data;
 	int *blank;
 
-	if (evdata && evdata->data && event == FB_EVENT_BLANK) {
+	if (evdata && evdata->data && event == MI_DRM_EVENT_BLANK) {
 		blank = evdata->data;
 		switch (*blank) {
-			case FB_BLANK_UNBLANK:
+			case MI_DRM_BLANK_UNBLANK:
 				mdata->display_on = true;
 				break;
-			case FB_BLANK_POWERDOWN:
-			case FB_BLANK_HSYNC_SUSPEND:
-			case FB_BLANK_VSYNC_SUSPEND:
-			case FB_BLANK_NORMAL:
+			case MI_DRM_BLANK_LP1:
+			case MI_DRM_BLANK_LP2:
+			case MI_DRM_BLANK_POWERDOWN:
 				mdata->display_on = false;
 				break;
 		}
