@@ -107,6 +107,15 @@ choice
 	config DEFAULT_NOOP
 		bool "No-op"
 
+	config DEFAULT_BFQ
+		bool "BFQ" if IOSCHED_BFQ=y
+
+	config DEFAULT_MQ_DEADLINE
+		bool "MQ_DEADLINE" if MQ_IOSCHED_DEADLINE=y
+
+	config DEFAULT_KYBER
+		bool "KYBER" if MQ_IOSCHED_KYBER=y
+
 	config DEFAULT_SIO
 		bool "SIO" if IOSCHED_SIO=y
 
@@ -132,6 +141,9 @@ config DEFAULT_IOSCHED
 	default "deadline" if DEFAULT_DEADLINE
 	default "cfq" if DEFAULT_CFQ
 	default "noop" if DEFAULT_NOOP
+	default "bfq" if DEFAULT_BFQ
+	default "mq-deadline" if DEFAULT_MQ_DEADLINE
+	default "kyber" if DEFAULT_KYBER
 	default "fiops" if DEFAULT_FIOPS
 	default "sio" if DEFAULT_SIO
 	default "zen" if DEFAULT_ZEN
